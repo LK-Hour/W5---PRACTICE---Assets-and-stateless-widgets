@@ -1,71 +1,162 @@
 import 'package:flutter/material.dart';
 
 void main() {
-  runApp(const WeatherApp());
-}
-
-class WeatherApp extends StatelessWidget {
-  const WeatherApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Weather Forecast',
-      theme: ThemeData(
-        useMaterial3: true,
-        appBarTheme: AppBarTheme(
+  runApp(
+    MaterialApp(
+      home: Scaffold(
+        appBar: AppBar(
           backgroundColor: Colors.blue,
           foregroundColor: Colors.white,
           centerTitle: true,
+          title: const Padding(
+            padding: EdgeInsets.all(8.0),
+            child: Text("Weather Forecast"),
+          ),
         ),
-        scaffoldBackgroundColor: Colors.grey[100],
+        endDrawer: Drawer(),
+        body: Container(
+          color: Colors.grey[100],
+          padding: const EdgeInsets.all(20.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              WeatherCard(weather: CityWeather.phnomPenh),
+              const SizedBox(height: 16.0),
+              WeatherCard(weather: CityWeather.paris),
+              const SizedBox(height: 16.0),
+              WeatherCard(weather: CityWeather.roma),
+              const SizedBox(height: 16.0),
+              WeatherCard(weather: CityWeather.toulouse),
+            ],
+          ),
+        ),
       ),
-      home: const WeatherHomePage(),
-    );
-  }
+    ),
+  );
 }
 
-class WeatherHomePage extends StatelessWidget {
-  const WeatherHomePage({super.key});
+class WeatherCard extends StatelessWidget {
+  final CityWeather weather;
+
+  const WeatherCard({super.key, required this.weather});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Padding(
-          padding: EdgeInsets.all(8.0),
-          child: Text("Weather Forecast"),
+    return PhysicalModel(
+      color: Colors.transparent,
+      elevation: 8.0,
+      borderRadius: BorderRadius.circular(20.0),
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(20.0),
+          gradient: weather.weatherType.gradient,
         ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.menu),
-            onPressed: () {
-              Scaffold.of(context).openDrawer();
-            },
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(20),
+          child: Stack(
+            children: [
+              // Decorative gradient circle in bottom-right
+              Positioned(
+                right: -40.0,
+                bottom: -40.0,
+                child: Container(
+                  width: 180.0,
+                  height: 180.0,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Colors.white.withValues(alpha: 0.15),
+                  ),
+                ),
+              ),
+
+              // Weather content
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20.0, 20.0, 20.0, 40.0),
+                child: Row(
+                  children: [
+                    // Left side - Weather icon
+                    CircleAvatar(
+                      radius: 30.0,
+                      child: ClipOval(
+                        child: Image.asset(
+                          weather.weatherType.iconPath,
+                          width: 75.0,
+                          height: 75.0,
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 16.0),
+
+                    // Middle - Weather information
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          // City name
+                          Text(
+                            weather.cityName,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 20.0,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 4.0),
+
+                          // Min temperature
+                          Text(
+                            'Min ${weather.minTemp}°C',
+                            style: TextStyle(
+                              color: Colors.white54,
+                              fontSize: 14.0,
+                            ),
+                          ),
+
+                          // Max temperatures
+                          Text(
+                            'Max ${weather.maxTemp}°C',
+                            style: TextStyle(
+                              color: Colors.white54,
+                              fontSize: 14.0,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    // Right side - Current temperature (large)
+                    Text(
+                      '${weather.currentTemp}°C',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 26.0,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
-        ],
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(20.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            for (final city in CityWeather.values) WeatherCard(weather: city),
-          ],
         ),
       ),
     );
   }
 }
 
-// Weather Type Enum with better asset handling and fallbacks
+// Weather Type Enum
 enum WeatherType {
   sunny(
     iconPath: 'assets/sunny.png',
     gradient: LinearGradient(
       begin: Alignment.topLeft,
       end: Alignment.bottomRight,
-      colors: [Color(0xFF667eea), Color(0xFF764ba2)],
+      colors: [
+        Color.fromARGB(255, 255, 10, 10),
+        Color.fromARGB(255, 255, 0, 0),
+      ],
     ),
   ),
   cloudy(
@@ -73,7 +164,10 @@ enum WeatherType {
     gradient: LinearGradient(
       begin: Alignment.topLeft,
       end: Alignment.bottomRight,
-      colors: [Color(0xFF4ca1af), Color(0xFF2c3e50)],
+      colors: [
+        Color.fromARGB(255, 239, 88, 250),
+        Color.fromARGB(255, 162, 28, 171),
+      ],
     ),
   ),
   sunnyCloudy(
@@ -81,7 +175,10 @@ enum WeatherType {
     gradient: LinearGradient(
       begin: Alignment.topLeft,
       end: Alignment.bottomRight,
-      colors: [Color(0xFFf46b45), Color(0xFFeea849)],
+      colors: [
+        Color.fromARGB(255, 21, 217, 21),
+        Color.fromARGB(255, 79, 183, 14),
+      ],
     ),
   ),
   veryCloudy(
@@ -89,7 +186,7 @@ enum WeatherType {
     gradient: LinearGradient(
       begin: Alignment.topLeft,
       end: Alignment.bottomRight,
-      colors: [Color(0xFF606c88), Color(0xFF3f4c6b)],
+      colors: [Color(0xFFf46b45), Color.fromARGB(255, 236, 186, 117)],
     ),
   );
 
@@ -97,22 +194,9 @@ enum WeatherType {
 
   final String iconPath;
   final LinearGradient gradient;
-
-  // Helper to safely load image
-  Widget getIconWidget({double size = 35}) {
-    return Image.asset(
-      iconPath,
-      width: size,
-      height: size,
-      color: Colors.white,
-      errorBuilder: (context, error, stackTrace) {
-        return Icon(Icons.cloud, size: size, color: Colors.white);
-      },
-    );
-  }
 }
 
-// City Weather Enum - now using a list for easier management
+// City Weather Enum
 enum CityWeather {
   phnomPenh(
     cityName: 'Phnom Penh',
@@ -156,111 +240,4 @@ enum CityWeather {
   final double maxTemp;
   final double currentTemp;
   final WeatherType weatherType;
-
-  // Formatted temperature display
-  String get currentTempDisplay => '${currentTemp.toStringAsFixed(1)}°C';
-  String get minTempDisplay => 'Min ${minTemp.toStringAsFixed(1)}°C';
-  String get maxTempDisplay => 'Max ${maxTemp.toStringAsFixed(1)}°C';
-}
-
-class WeatherCard extends StatelessWidget {
-  final CityWeather weather;
-
-  const WeatherCard({super.key, required this.weather});
-
-  @override
-  Widget build(BuildContext context) {
-    return PhysicalModel(
-      color: Colors.transparent,
-      elevation: 8.0,
-      borderRadius: BorderRadius.circular(20.0),
-      child: Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(20.0),
-          gradient: weather.weatherType.gradient,
-        ),
-        child: Stack(
-          children: [
-            // Decorative gradient circle in bottom-right
-            Positioned(
-              right: -30.0,
-              bottom: -30.0,
-              child: Container(
-                width: 100.0,
-                height: 100.0,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Colors.white.withOpacity(0.2),
-                ),
-              ),
-            ),
-
-            // Weather content
-            Padding(
-              padding: const EdgeInsets.all(20.0),
-              child: Row(
-                children: [
-                  // Left side - Weather icon
-                  CircleAvatar(
-                    radius: 30.0,
-                    backgroundColor: Colors.white.withOpacity(0.3),
-                    child: weather.weatherType.getIconWidget(size: 35),
-                  ),
-                  const SizedBox(width: 16.0),
-
-                  // Middle - Weather information
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        // City name
-                        Text(
-                          weather.cityName,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 20.0,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 4.0),
-
-                        // Min temperature
-                        Text(
-                          weather.minTempDisplay,
-                          style: TextStyle(
-                            color: Colors.white.withOpacity(0.9),
-                            fontSize: 14.0,
-                          ),
-                        ),
-
-                        // Max temperature
-                        Text(
-                          weather.maxTempDisplay,
-                          style: TextStyle(
-                            color: Colors.white.withOpacity(0.9),
-                            fontSize: 14.0,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-
-                  // Right side - Current temperature (large)
-                  Text(
-                    weather.currentTempDisplay,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 36.0,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
 }
