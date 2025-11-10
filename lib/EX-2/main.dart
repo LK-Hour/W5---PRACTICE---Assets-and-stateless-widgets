@@ -1,46 +1,44 @@
 import 'package:flutter/material.dart';
-import 'package:device_preview/device_preview.dart';
+
+enum ButtonType { primary, secondary, disabled }
+
+enum IconPosition { left, right }
 
 void main() {
   runApp(
-    DevicePreview(
-      enabled: true,
-      tools: const [...DevicePreview.defaultTools],
-      builder: (context) => MaterialApp(
-        useInheritedMediaQuery: true,
-        locale: DevicePreview.locale(context),
-        builder: DevicePreview.appBuilder,
-        theme: ThemeData.light(),
-        darkTheme: ThemeData.dark(),
-        home: Scaffold(
-          appBar: AppBar(
-            backgroundColor: const Color.fromARGB(255, 169, 170, 170),
-            title: const Text("My Hobbies"),
+    MaterialApp(
+      home: Scaffold(
+        appBar: AppBar(
+          backgroundColor: Colors.green,
+          centerTitle: true,
+          title: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: const Text("Custom buttons"),
           ),
-          body: Container(
-            padding: const EdgeInsets.all(40.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                MyNewWidget(
-                  text: "Sea",
-                  icon: Icons.beach_access_outlined,
-                  color: Colors.blue[100]!,
-                ),
-                SizedBox(height: 10),
-                MyNewWidget(
-                  text: "Mountain",
-                  icon: Icons.travel_explore,
-                  color: Colors.blue[100]!,
-                ),
-                SizedBox(height: 10),
-                MyNewWidget(
-                  text: "Forest",
-                  icon: Icons.forest_rounded,
-                  color: Colors.blue[100]!,
-                ),
-              ],
-            ),
+        ),
+        body: Container(
+          // height: 80.0,
+          color: Colors.white,
+          padding: const EdgeInsets.all(40.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              CustomButton(label: "Submit", icon: Icons.check),
+              SizedBox(height: 10.0),
+              CustomButton(
+                label: "Time",
+                icon: Icons.timer,
+                iconPosition: IconPosition.right,
+                buttonType: ButtonType.secondary,
+              ),
+              SizedBox(height: 10.0),
+              CustomButton(
+                label: "Account",
+                icon: Icons.account_tree_sharp,
+                iconPosition: IconPosition.right,
+                buttonType: ButtonType.disabled,
+              ),
+            ],
           ),
         ),
       ),
@@ -48,45 +46,59 @@ void main() {
   );
 }
 
-class MyNewWidget extends StatelessWidget {
-  final String text;
+class CustomButton extends StatelessWidget {
+  final String label;
   final IconData icon;
-  final Color color;
-  const MyNewWidget({
+  final IconPosition iconPosition;
+  final ButtonType buttonType;
+
+  const CustomButton({
     super.key,
-    required this.text,
+    required this.label,
     required this.icon,
-    this.color = Colors.blue,
+    this.iconPosition = IconPosition.left,
+    this.buttonType = ButtonType.primary,
   });
+
+  Color _getButtonColor() {
+    switch (buttonType) {
+      case ButtonType.primary:
+        return Colors.blue;
+      case ButtonType.secondary:
+        return Colors.green;
+      case ButtonType.disabled:
+        return Colors.grey;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: 60,
-      decoration: BoxDecoration(
-        color: color,
-        borderRadius: BorderRadius.circular(20.0),
+    final buttonColor = _getButtonColor();
+
+    return ElevatedButton(
+      onPressed: buttonType == ButtonType.disabled ? null : () {},
+      style: ElevatedButton.styleFrom(
+        backgroundColor: buttonColor,
+        foregroundColor: Colors.white,
+        disabledBackgroundColor: Colors.grey,
+        disabledForegroundColor: Colors.white70,
       ),
-      child: Material(
-        color: Colors.transparent,
-        child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: 20.0),
-          child: Row(
-            children: <Widget>[
-              Icon(icon, color: Colors.white),
-              SizedBox(width: 10.0),
-              Text(
-                text,
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 16.0,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ],
-          ),
-        ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: _buildButtonContent(),
       ),
     );
+  }
+
+  List<Widget> _buildButtonContent() {
+    final iconWidget = Icon(icon);
+    const textWidget = SizedBox(width: 8);
+    final labelWidget = Text(label);
+
+    if (iconPosition == IconPosition.left) {
+      return [iconWidget, textWidget, labelWidget];
+    } else {
+      return [labelWidget, textWidget, iconWidget];
+    }
   }
 }
